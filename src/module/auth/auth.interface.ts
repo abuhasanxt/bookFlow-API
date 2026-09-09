@@ -9,3 +9,7 @@ export interface UserLogin {
     password:string
 
 }
+export interface VerifyEmailData {
+email:string,
+otp:string
+}

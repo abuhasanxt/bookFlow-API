@@ -6,6 +6,7 @@ import { Role } from "../../../generated/prisma/enums"
 const router=express.Router()
 router.post("/register",authController.register)
 router.post("/login",authController.login)
+router.post("/email-verify",authController.verifyEmail)
 router.get("/me",checkAuth(Role.USER,Role.ADMIN), authController.getMe)
 
 export const authRoutes=router

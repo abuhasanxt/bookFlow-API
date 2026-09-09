@@ -2,7 +2,7 @@
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
-import { UserData, UserLogin } from "./auth.interface";
+import { UserData, UserLogin, VerifyEmailData } from "./auth.interface";
 import bcrypt from "bcrypt";
 import { tokenUtils } from "../../utils/token";
 import { sendEmail } from "../../utils/email";
@@ -144,8 +144,92 @@ const getMe = async (userId: string) => {
   return safeUser;
 };
 
+const verifyEmail = async (payload: VerifyEmailData) => {
+  const { email, otp } = payload;
+  const normalizedEmail = email.toLowerCase().trim();
+  //find otp
+  const verification = await prisma.emailVerification.findFirst({
+    where: {
+      email: normalizedEmail,
+      otp,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  if (!verification) {
+    throw new AppError(status.NOT_FOUND, "Verification OTP not found");
+  }
+
+  //check otp
+  if (verification.otp !== otp) {
+    throw new AppError(status.BAD_REQUEST, "Invalid verification OTP .");
+  }
+
+  //check expire
+  if (verification.expiresAt < new Date()) {
+    throw new AppError(status.BAD_REQUEST, "Verification OTP has expired.");
+  }
+
+  //find user
+  const user = await prisma.user.findUnique({
+    where: {
+      email: normalizedEmail,
+    },
+  });
+
+  //check user
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, "User not found.");
+  }
+
+  //already verified
+  if (user.emailVerified) {
+    throw new AppError(status.BAD_REQUEST, "Email is already verified.");
+  }
+
+  //  Update user + delete OTP
+  await prisma.$transaction([
+    prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        emailVerified: true,
+      },
+    }),
+
+    prisma.emailVerification.delete({
+      where: {
+        id: verification.id,
+      },
+    }),
+  ]);
+  const accessToken = tokenUtils.getAccessToken({
+    userId: user.id,
+    role: user.role,
+    name: user.name,
+    email: user.email,
+    emailVerified: user.emailVerified,
+  });
+  const refreshToken = tokenUtils.getRefreshToken({
+    userId: user.id,
+    role: user.role,
+    name: user.name,
+    email: user.email,
+    emailVerified: user.emailVerified,
+  });
+  return {
+    accessToken,
+    refreshToken,
+    message: "Email verified successfully.",
+  };
+};
+
 export const authService = {
   register,
   login,
   getMe,
+  verifyEmail
 };

@@ -46,8 +46,27 @@ const getMe=catchAsync(async(req:Request,res:Response)=>{
     data:result
   })
 })
+
+const verifyEmail=catchAsync(async(req:Request,res:Response)=>{
+  const result=await authService.verifyEmail(req.body)
+  const {accessToken,refreshToken,...rest}=result
+  tokenUtils.setAccessTokenCookie(res,accessToken);
+  tokenUtils.setRefreshTokenCookie(res,refreshToken)
+
+  sendResponse(res,{
+    success:true,
+    httpStatusCode:status.OK,
+    message:result.message,
+    data:{
+      accessToken,
+      refreshToken,
+      ...rest
+    }
+  })
+})
 export const authController={
     register,
     login,
-    getMe
+    getMe,
+    verifyEmail
 }
