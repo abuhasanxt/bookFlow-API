@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import status from "http-status";
+import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { UserData } from "./auth.interface";
 import bcrypt from "bcrypt";
@@ -12,7 +14,7 @@ const register = async (payload: UserData) => {
     },
   });
   if (existingUser) {
-    throw new Error(
+    throw new AppError(status.CONFLICT,
       "An account with this email already exists. please log in .",
     );
   }
@@ -26,7 +28,7 @@ const register = async (payload: UserData) => {
     },
   });
   if (!result.email) {
-    throw new Error("Failed to register user");
+    throw new AppError(status.BAD_REQUEST,"Failed to register user");
   }
   const { passwordHash: _, ...safeUser } = result;
   return safeUser;

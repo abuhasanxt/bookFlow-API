@@ -1,6 +1,8 @@
 
 import express, { Application, Request, Response } from "express"
 import { indexRoutes } from "./routes";
+import { notFound } from "./middleware/notFound";
+import { errorHandler } from "./middleware/globalErrorHandler";
 const app: Application = express();
 
 // Enable URL-encoded form data parsing
@@ -14,6 +16,6 @@ app.use("/",indexRoutes)
 app.get('/', (req: Request, res: Response) => {
   res.send('Book Flow API!');
 });
-
-
+app.use(errorHandler)
+app.use(notFound)
 export default app;
