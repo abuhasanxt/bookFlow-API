@@ -3,10 +3,11 @@ import dotenv from "dotenv";
 dotenv.config();
 interface EnvConfig {
   PORT: string;
+  DATABASE_URL: string;
 }
 
 const loadEnvVariables = () => {
-  const requiredEnvVariable = ["PORT"];
+  const requiredEnvVariable = ["PORT", "DATABASE_URL"];
   requiredEnvVariable.forEach((variable) => {
     if (!process.env[variable]) {
       throw new Error(
@@ -16,6 +17,7 @@ const loadEnvVariables = () => {
   });
   return {
     PORT: process.env.PORT as string,
+    DATABASE_URL: process.env.DATABASE_URL as string,
   };
 };
 
