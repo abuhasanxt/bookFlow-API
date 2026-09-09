@@ -4,6 +4,7 @@ import { authService } from "./auth.service";
 import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 import { tokenUtils } from "../../utils/token";
+import AppError from "../../errorHelpers/AppError";
 
 const register =catchAsync(async(req:Request,res:Response)=>{
     const result=await authService.register(req.body);
@@ -32,7 +33,21 @@ const login=catchAsync(async(req:Request,res:Response)=>{
     })
 })
 
+const getMe=catchAsync(async(req:Request,res:Response)=>{
+  const userId=req.user.userId
+  if (!userId) {
+    throw new AppError(status.UNAUTHORIZED,"You are unauthorized")
+  }
+  const result=await authService.getMe(userId)
+  sendResponse(res,{
+    success:true,
+    httpStatusCode:status.OK,
+    message:"Get my profile",
+    data:result
+  })
+})
 export const authController={
     register,
-    login
+    login,
+    getMe
 }

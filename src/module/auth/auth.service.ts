@@ -56,7 +56,7 @@ const login = async (payload: UserLogin) => {
     throw new AppError(status.BAD_REQUEST, "Invalid email or password");
   }
 
-    const accessToken = tokenUtils.getAccessToken({
+  const accessToken = tokenUtils.getAccessToken({
     userId: user.id,
     role: user.role,
     name: user.name,
@@ -78,7 +78,21 @@ const login = async (payload: UserLogin) => {
     refreshToken,
   };
 };
+const getMe = async (userId: string) => {
+  const result = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+  if (!result) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+  const { passwordHash: _, ...safeUser } = result;
+  return safeUser;
+};
+
 export const authService = {
   register,
   login,
+  getMe
 };

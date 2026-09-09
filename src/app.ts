@@ -3,6 +3,7 @@ import express, { Application, Request, Response } from "express"
 import { indexRoutes } from "./routes";
 import { notFound } from "./middleware/notFound";
 import { errorHandler } from "./middleware/globalErrorHandler";
+import cookieParser from "cookie-parser";
 const app: Application = express();
 
 // Enable URL-encoded form data parsing
@@ -10,7 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-
+app.use(cookieParser())
 app.use("/",indexRoutes)
 // Basic route
 app.get('/', (req: Request, res: Response) => {
