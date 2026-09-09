@@ -33,6 +33,31 @@ const register = async (payload: UserData) => {
   if (!result.email) {
     throw new AppError(status.BAD_REQUEST, "Failed to register user");
   }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  //otp expire - 2 minutes
+  const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+
+  //save otp
+  await prisma.emailVerification.create({
+    data: {
+      email: normalizedEmail,
+      otp,
+      expiresAt,
+    },
+  });
+
+  // send otp
+  await sendEmail({
+    to: normalizedEmail,
+    subject: "Verify Your Email",
+    templateName: "OTP",
+    templateData: {
+      user: result.name,
+      otp,
+    },
+  });
+
   const { passwordHash: _, ...safeUser } = result;
   return safeUser;
 };
@@ -59,20 +84,29 @@ const login = async (payload: UserLogin) => {
 
   //check email verification
   if (!user.emailVerified) {
-   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-   //otp expire
-   const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    //otp expire
+    const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
 
-   // send otp
-   await sendEmail({
-    to:normalizedEmail,
-    subject:"Verify Your Email",
-    templateName:"OTP",
-    templateData:{
-      user:user.name,
-      otp
-    }
-   })
+    //save otp
+    await prisma.emailVerification.create({
+      data: {
+        email: normalizedEmail,
+        otp,
+        expiresAt,
+      },
+    });
+
+    // send otp
+    await sendEmail({
+      to: normalizedEmail,
+      subject: "Verify Your Email",
+      templateName: "OTP",
+      templateData: {
+        user: user.name,
+        otp,
+      },
+    });
   }
 
   const accessToken = tokenUtils.getAccessToken({
@@ -113,5 +147,5 @@ const getMe = async (userId: string) => {
 export const authService = {
   register,
   login,
-  getMe
+  getMe,
 };
