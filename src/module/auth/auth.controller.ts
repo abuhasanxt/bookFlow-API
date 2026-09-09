@@ -3,6 +3,7 @@ import { catchAsync } from "../../shared/catchAsync";
 import { authService } from "./auth.service";
 import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
+import { tokenUtils } from "../../utils/token";
 
 const register =catchAsync(async(req:Request,res:Response)=>{
     const result=await authService.register(req.body);
@@ -16,11 +17,18 @@ const register =catchAsync(async(req:Request,res:Response)=>{
 
 const login=catchAsync(async(req:Request,res:Response)=>{
     const result=await authService.login(req.body)
+    const {accessToken,refreshToken,...rest}=result;
+    tokenUtils.setAccessTokenCookie(res,accessToken)
+    tokenUtils.setRefreshTokenCookie(res,refreshToken)
     sendResponse(res,{
         success:true,
         httpStatusCode:status.OK,
         message:"Login successfully",
-        data:result
+        data:{
+            accessToken,
+            refreshToken,
+            ...rest
+        }
     })
 })
 

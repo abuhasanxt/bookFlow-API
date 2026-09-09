@@ -4,6 +4,7 @@ import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { UserData, UserLogin } from "./auth.interface";
 import bcrypt from "bcrypt";
+import { tokenUtils } from "../../utils/token";
 
 const register = async (payload: UserData) => {
   const { name, email, password } = payload;
@@ -50,14 +51,34 @@ const login = async (payload: UserLogin) => {
     );
   }
 
-  const isPasswordMatched=await bcrypt.compare(password,user.passwordHash)
+  const isPasswordMatched = await bcrypt.compare(password, user.passwordHash);
   if (!isPasswordMatched) {
-    throw new AppError(status.BAD_REQUEST,"Invalid email or password")
+    throw new AppError(status.BAD_REQUEST, "Invalid email or password");
   }
-  const {passwordHash:_,...safeUser}=user
-  return safeUser
+
+    const accessToken = tokenUtils.getAccessToken({
+    userId: user.id,
+    role: user.role,
+    name: user.name,
+    email: user.email,
+    emailVerified: user.emailVerified,
+  });
+  const refreshToken = tokenUtils.getRefreshToken({
+    userId: user.id,
+    role: user.role,
+    name: user.name,
+    email: user.email,
+    emailVerified: user.emailVerified,
+  });
+
+  const { passwordHash: _, ...safeUser } = user;
+  return {
+    ...safeUser,
+    accessToken,
+    refreshToken,
+  };
 };
 export const authService = {
   register,
-  login
+  login,
 };
