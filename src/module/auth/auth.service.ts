@@ -5,6 +5,7 @@ import { prisma } from "../../lib/prisma";
 import { UserData, UserLogin } from "./auth.interface";
 import bcrypt from "bcrypt";
 import { tokenUtils } from "../../utils/token";
+import { sendEmail } from "../../utils/email";
 
 const register = async (payload: UserData) => {
   const { name, email, password } = payload;
@@ -54,6 +55,24 @@ const login = async (payload: UserLogin) => {
   const isPasswordMatched = await bcrypt.compare(password, user.passwordHash);
   if (!isPasswordMatched) {
     throw new AppError(status.BAD_REQUEST, "Invalid email or password");
+  }
+
+  //check email verification
+  if (!user.emailVerified) {
+   const otp = Math.floor(100000 + Math.random() * 900000).toString();
+   //otp expire
+   const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+
+   // send otp
+   await sendEmail({
+    to:normalizedEmail,
+    subject:"Verify Your Email",
+    templateName:"OTP",
+    templateData:{
+      user:user.name,
+      otp
+    }
+   })
   }
 
   const accessToken = tokenUtils.getAccessToken({
