@@ -64,9 +64,27 @@ const verifyEmail=catchAsync(async(req:Request,res:Response)=>{
     }
   })
 })
+
+const getNewToken=catchAsync(async(req:Request,res:Response)=>{
+  const refreshToken=req.cookies.refreshToken
+  const result=await authService.getNewToken(refreshToken)
+  const {newAccessToken,newRefreshToken}=result;
+  tokenUtils.setAccessTokenCookie(res,newAccessToken)
+  tokenUtils.setRefreshTokenCookie(res,newRefreshToken);
+  sendResponse(res,{
+    success:true,
+    httpStatusCode:status.CREATED,
+    message:"New tokens generate successfully",
+    data:{
+      newAccessToken,
+      newRefreshToken
+    }
+  })
+})
 export const authController={
     register,
     login,
     getMe,
-    verifyEmail
+    verifyEmail,
+    getNewToken
 }

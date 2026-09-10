@@ -6,6 +6,9 @@ import { UserData, UserLogin, VerifyEmailData } from "./auth.interface";
 import bcrypt from "bcrypt";
 import { tokenUtils } from "../../utils/token";
 import { sendEmail } from "../../utils/email";
+import { jwtUtils } from "../../utils/jwt";
+import { envVars } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 
 const register = async (payload: UserData) => {
   const { name, email, password } = payload;
@@ -226,10 +229,54 @@ const verifyEmail = async (payload: VerifyEmailData) => {
     message: "Email verified successfully.",
   };
 };
+const getNewToken = async (refreshToken: string) => {
+  if (!refreshToken) {
+    throw new AppError(status.UNAUTHORIZED, "Refresh token is required");
+  }
 
+  //verify refresh token
+  const verifiedToken = jwtUtils.verifyToken(
+    refreshToken,
+    envVars.JWT_REFRESH_SECRET,
+  );
+
+  //check verify refresh token
+  if (!verifiedToken.success) {
+    throw new AppError(status.UNAUTHORIZED, "Invalid or expired refresh token");
+  }
+
+  const data = verifiedToken.data as JwtPayload;
+
+  if (!data) {
+    throw new AppError(status.UNAUTHORIZED, "Invalid refresh token payload.");
+  }
+
+  const newAccessToken = tokenUtils.getAccessToken({
+    userId: data.userId,
+    role: data.role,
+    name: data.name,
+    email: data.email,
+    emailVerified: data.emailVerified,
+  });
+
+  const newRefreshToken = tokenUtils.getRefreshToken({
+    userId: data.userId,
+    role: data.role,
+    name: data.name,
+    email: data.email,
+    emailVerified: data.emailVerified,
+  });
+
+  return {
+    newAccessToken,
+    newRefreshToken,
+  };
+};
 export const authService = {
   register,
   login,
   getMe,
-  verifyEmail
+  verifyEmail,
+  getNewToken
+  
 };
