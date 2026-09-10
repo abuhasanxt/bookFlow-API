@@ -272,11 +272,18 @@ const getNewToken = async (refreshToken: string) => {
     newRefreshToken,
   };
 };
+
+const logOut=async()=>{
+  return{
+    message:"Logged out successfully"
+  }
+}
 export const authService = {
   register,
   login,
   getMe,
   verifyEmail,
-  getNewToken
+  getNewToken,
+  logOut
   
 };

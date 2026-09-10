@@ -81,10 +81,24 @@ const getNewToken=catchAsync(async(req:Request,res:Response)=>{
     }
   })
 })
+
+const logout=catchAsync(async(req:Request,res:Response)=>{
+  tokenUtils.clearAccessTokenCookie(res)
+  tokenUtils.clearRefreshTokenCookie(res)
+  
+  const result=await authService.logOut()
+   sendResponse(res,{
+    success:true,
+    httpStatusCode:status.OK,
+    message:result.message,
+  })
+
+})
 export const authController={
     register,
     login,
     getMe,
     verifyEmail,
-    getNewToken
+    getNewToken,
+    logout
 }
