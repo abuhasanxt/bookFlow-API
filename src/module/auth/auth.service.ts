@@ -343,6 +343,35 @@ const updateMe = async (userId: string, payload: UpdateUser) => {
 const { passwordHash: _, ...safeUser } = result;
   return safeUser;
 };
+
+const deleteMe=async(userId:string)=>{
+  const user=await prisma.user.findUnique({
+    where:{
+      id:userId
+    }
+  })
+
+  if (!user) {
+    throw new AppError(status.NOT_FOUND,"User not found")
+  }
+
+  const result=await prisma.user.delete({
+    where:{
+      id:userId
+    }
+  })
+
+ // Delete product image from Cloudinary
+  if (user.image) {
+    try {
+      await deleteFileFromCloudinary(user.image);
+    } catch (error) {
+      console.error("Failed to delete your profile photo from Cloudinary:", error);
+    }
+  }
+
+  return { message: " Deleted your profile successfully" };
+}
 export const authService = {
   register,
   login,
@@ -350,6 +379,7 @@ export const authService = {
   verifyEmail,
   getNewToken,
   logOut,
-  updateMe
+  updateMe,
+  deleteMe
   
 };

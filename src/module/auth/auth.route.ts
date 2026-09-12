@@ -14,5 +14,6 @@ router.post("/refresh",authController.getNewToken)
 router.post("/logout",checkAuth(),authController.logout)
 router.get("/me",checkAuth(Role.USER,Role.ADMIN), authController.getMe)
 router.patch("/me",checkAuth(),multerUpload.single("image"),validateRequest(userUpdateZodSchema),authController.updateMe)
+router.delete("/me",checkAuth(),authController.deleteMe)
 
 export const authRoutes=router

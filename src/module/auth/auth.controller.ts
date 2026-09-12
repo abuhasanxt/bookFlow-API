@@ -112,6 +112,22 @@ const payload={
     data:result
   })
 })
+const deleteMe=catchAsync(async(req:Request,res:Response)=>{
+  const userId=req.user.userId
+
+  if (!userId) {
+    throw new AppError(status.UNAUTHORIZED,"You are unauthorized")
+  }
+
+  const result=await authService.deleteMe(userId)
+
+  sendResponse(res,{
+    success:true,
+    httpStatusCode:status.OK,
+    message:"Profile delete successfully",
+    data:result
+  })
+})
 export const authController={
     register,
     login,
@@ -119,5 +135,6 @@ export const authController={
     verifyEmail,
     updateMe,
     getNewToken,
-    logout
+    logout,
+    deleteMe
 }
