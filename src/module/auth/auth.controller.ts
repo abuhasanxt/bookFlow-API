@@ -5,6 +5,7 @@ import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 import { tokenUtils } from "../../utils/token";
 import AppError from "../../errorHelpers/AppError";
+import { envVars } from "../../config/env";
 
 const register =catchAsync(async(req:Request,res:Response)=>{
     const result=await authService.register(req.body);
@@ -128,6 +129,92 @@ const deleteMe=catchAsync(async(req:Request,res:Response)=>{
     data:result
   })
 })
+
+const googleLogin = catchAsync(
+  async (req: Request, res: Response) => {
+    const { googleAuthUrl, state } = authService.googleLogin();
+
+    // Save OAuth state
+    res.cookie("google_oauth_state", state, {
+      httpOnly: true,
+      secure: envVars.NODE === "production",
+      sameSite:
+        envVars.NODE === "production"
+          ? "none"
+          : "lax",
+      maxAge: 10 * 60 * 1000,
+    });
+
+    // Redirect user to Google
+    return res.redirect(googleAuthUrl);
+  },
+);
+
+const googleCallback = catchAsync(
+  async (req: Request, res: Response) => {
+    const { code, state, error } = req.query;
+    //  Google Login Error
+    if (error) {
+      res.clearCookie("google_oauth_state");
+
+      return res.redirect(
+        `${envVars.FRONTEND_URL}/login?error=google_login_failed`,
+      );
+    }
+    //  Authorization Code Check
+    if (!code || typeof code !== "string") {
+      throw new AppError(
+        status.BAD_REQUEST,
+        "Google authorization code is missing",
+      );
+    }
+    //  State Check
+    if (!state || typeof state !== "string") {
+      throw new AppError(
+        status.BAD_REQUEST,
+        "Google OAuth state is missing",
+      );
+    }
+    //  Compare State
+    const savedState = req.cookies.google_oauth_state;
+
+    if (!savedState || savedState !== state) {
+      throw new AppError(
+        status.UNAUTHORIZED,
+        "Invalid Google OAuth state",
+      );
+    }
+    //  Google Callback
+    const result = await authService.googleCallback(code);
+
+    //  Remove OAuth State Cookie
+    res.clearCookie("google_oauth_state");
+    //  Set Access Token Cookie
+    res.cookie("accessToken", result.accessToken, {
+      httpOnly: true,
+      secure: envVars.NODE === "production",
+      sameSite:
+        envVars.NODE === "production"
+          ? "none"
+          : "lax",
+      maxAge: 15 * 60 * 1000,
+    });
+    // Set Refresh Token Cookie
+    res.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: envVars.NODE === "production",
+      sameSite:
+        envVars.NODE === "production"
+          ? "none"
+          : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    // Redirect to Frontend
+    return res.redirect(
+      `${envVars.FRONTEND_URL}/dashboard`,
+    );
+  },
+);
 export const authController={
     register,
     login,
@@ -136,5 +223,7 @@ export const authController={
     updateMe,
     getNewToken,
     logout,
-    deleteMe
+    deleteMe,
+    googleLogin,
+    googleCallback
 }

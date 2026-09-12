@@ -11,6 +11,8 @@ interface EnvConfig {
   JWT_ACCESS_EXPIRES_IN: string;
   JWT_REFRESH_SECRET: string;
   JWT_REFRESH_EXPIRES_IN: string;
+  FRONTEND_URL: string;
+  BACKEND_URL: string;
   EMAIL_SENDER: {
     SMTP_USER: string;
     SMTP_PASSWORD: string;
@@ -18,9 +20,12 @@ interface EnvConfig {
     SMTP_PORT: string;
     SMTP_FROM: string;
   };
-  CLOUDINARY_CLOUD_NAME:string;
-  CLOUDINARY_API_KEY:string;
-  CLOUDINARY_API_SECRET:string;
+  CLOUDINARY_CLOUD_NAME: string;
+  CLOUDINARY_API_KEY: string;
+  CLOUDINARY_API_SECRET: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  GOOGLE_CALLBACK_URL: string;
 }
 
 const loadEnvVariables = () => {
@@ -31,6 +36,8 @@ const loadEnvVariables = () => {
     "JWT_ACCESS_SECRET",
     "JWT_REFRESH_SECRET",
     "JWT_REFRESH_EXPIRES_IN",
+    "FRONTEND_URL",
+    "BACKEND_URL",
     "EMAIL_SENDER_SMTP_USER",
     "EMAIL_SENDER_SMTP_PASSWORD",
     "EMAIL_SENDER_SMTP_HOST",
@@ -39,6 +46,9 @@ const loadEnvVariables = () => {
     "CLOUDINARY_CLOUD_NAME",
     "CLOUDINARY_API_KEY",
     "CLOUDINARY_API_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CALLBACK_URL",
   ];
   requiredEnvVariable.forEach((variable) => {
     if (!process.env[variable]) {
@@ -56,6 +66,8 @@ const loadEnvVariables = () => {
     JWT_ACCESS_EXPIRES_IN: process.env.JWT_ACCESS_EXPIRES_IN as string,
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET as string,
     JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN as string,
+    FRONTEND_URL: process.env.FRONTEND_URL as string,
+    BACKEND_URL: process.env.BACKEND_URL as string,
     EMAIL_SENDER: {
       SMTP_USER: process.env.EMAIL_SENDER_SMTP_USER as string,
       SMTP_PASSWORD: process.env.EMAIL_SENDER_SMTP_PASSWORD as string,
@@ -66,6 +78,9 @@ const loadEnvVariables = () => {
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
+    GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
   };
 };
 
