@@ -94,11 +94,30 @@ const logout=catchAsync(async(req:Request,res:Response)=>{
   })
 
 })
+const updateMe=catchAsync(async(req:Request,res:Response)=>{
+  const userId=req.user.userId
+  if (!userId) {
+    throw new AppError(status.UNAUTHORIZED,"You are unauthorized")
+  }
+const payload={
+  ...JSON.parse(req.body.data),
+  image:req.file?.path
+}
+  const result=await authService.updateMe(userId,payload)
+
+  sendResponse(res,{
+    success:true,
+    httpStatusCode:status.OK,
+    message:"Profile update successfully",
+    data:result
+  })
+})
 export const authController={
     register,
     login,
     getMe,
     verifyEmail,
+    updateMe,
     getNewToken,
     logout
 }

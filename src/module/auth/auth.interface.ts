@@ -13,3 +13,7 @@ export interface VerifyEmailData {
 email:string,
 otp:string
 }
+export  interface UpdateUser{
+    name?:string
+    image?:string
+}

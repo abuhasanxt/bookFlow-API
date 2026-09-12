@@ -2,13 +2,14 @@
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
-import { UserData, UserLogin, VerifyEmailData } from "./auth.interface";
+import { UpdateUser, UserData, UserLogin, VerifyEmailData } from "./auth.interface";
 import bcrypt from "bcrypt";
 import { tokenUtils } from "../../utils/token";
 import { sendEmail } from "../../utils/email";
 import { jwtUtils } from "../../utils/jwt";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
+import { deleteFileFromCloudinary } from "../../config/cloudinary";
 
 const register = async (payload: UserData) => {
   const { name, email, password } = payload;
@@ -278,12 +279,77 @@ const logOut=async()=>{
     message:"Logged out successfully"
   }
 }
+
+const updateMe = async (userId: string, payload: UpdateUser) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+
+  const updateData: {
+    name?: string;
+    image?: string;
+  } = {};
+
+  if (payload.name !== undefined) {
+    updateData.name = payload.name;
+  }
+  if (payload.image) {
+    updateData.image=payload.image
+  }
+  if (Object.keys(payload).length === 0) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Please provide at least one field to update",
+    );
+  }
+
+  const isSame =
+    (updateData.name === undefined || updateData.name === user.name) &&
+    (updateData.image === undefined || updateData.image === user.image);
+
+  if (isSame) {
+    throw new AppError(
+      status.CONFLICT,
+      "Your provided data is already up to date",
+    );
+  }
+
+  // Check whether new image is uploaded
+  const isNewImageUploaded =
+    updateData.image !== undefined &&
+    updateData.image !== user.image;
+
+  const result = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: updateData,
+  });
+
+    // Delete old image from Cloudinary
+  if (isNewImageUploaded && user.image) {
+    try {
+      await deleteFileFromCloudinary(user.image);
+    } catch (error) {
+      console.error("Old image deletion failed:", error);
+    }
+  }
+const { passwordHash: _, ...safeUser } = result;
+  return safeUser;
+};
 export const authService = {
   register,
   login,
   getMe,
   verifyEmail,
   getNewToken,
-  logOut
+  logOut,
+  updateMe
   
 };
