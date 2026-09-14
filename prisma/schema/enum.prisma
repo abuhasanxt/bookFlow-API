@@ -7,3 +7,9 @@ enum ResourceType {
   DESK
   EQUIPMENT
 }
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
