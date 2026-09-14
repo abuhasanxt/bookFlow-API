@@ -6,7 +6,7 @@ export const createResourceValidationSchema = z.object({
     .min(2, "Resource name must be at least 2 characters")
     .max(30, "Resource name cannot exceed 30 characters"),
 
-  type: z.enum(["ROOM", "EQUIPMENT", "SPACE"]),
+  type: z.enum(["ROOM", "DESK", "EQUIPMENT"]),
 
   description: z
     .string()
@@ -36,7 +36,9 @@ export const updateResourceValidationSchema = z.object({
     .max(30, "Resource name cannot exceed 30 characters")
     .optional(),
 
-  type: z.enum(["ROOM", "EQUIPMENT", "SPACE"]),
+    type: z
+    .enum(["ROOM", "DESK", "EQUIPMENT"])
+    .optional(),
 
   description: z
     .string()
@@ -57,4 +59,7 @@ export const updateResourceValidationSchema = z.object({
     .optional(),
 
   isActive: z.boolean().optional(),
+  amenityIds: z
+    .array(z.string().uuid("Invalid amenity ID"))
+    .optional(),
 });

@@ -2,7 +2,7 @@ import express from "express"
 import { checkAuth } from "../../middleware/checkAuth";
 import { Role } from "../../../generated/prisma/enums";
 import { validateRequest } from "../../middleware/validateRequest";
-import { createResourceValidationSchema } from "./resources.validation";
+import { createResourceValidationSchema, updateResourceValidationSchema } from "./resources.validation";
 import { resourceController } from "./resources.controller";
 const router=express.Router()
 
@@ -12,7 +12,11 @@ router.post(
   validateRequest(createResourceValidationSchema),
   resourceController.createResource
 );
-
+router.patch(
+  "/:id",
+  checkAuth(Role.ADMIN),validateRequest(updateResourceValidationSchema),
+  resourceController.updateResource
+);
 router.get("/",resourceController.getResources)
 router.get(
   "/:id",

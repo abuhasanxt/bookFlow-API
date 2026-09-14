@@ -20,3 +20,12 @@ export interface GetResourcesQuery {
   page?: number;
   limit?: number;
 }
+export interface UpdateResourceData {
+  name?: string;
+  type?: ResourceType;
+  description?: string;
+  capacity?: number;
+  priceCentsPerHour?: number;
+  isActive?: boolean;
+  amenityIds?: string[];
+}

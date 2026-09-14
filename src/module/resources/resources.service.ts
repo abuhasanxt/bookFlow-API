@@ -2,7 +2,7 @@ import status from "http-status";
 import { Prisma } from "../../../generated/prisma/client";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
-import { GetResourcesQuery, ResourceData } from "./resources.interface";
+import { GetResourcesQuery, ResourceData, UpdateResourceData } from "./resources.interface";
 
 const createResource = async (payload: ResourceData) => {
   const { amenityIds, ...resourceData } = payload;
@@ -132,8 +132,127 @@ const getResourceById = async (resourceId: string) => {
 
   return result;
 };
+
+
+const updateResource = async (
+  resourceId: string,
+  payload: UpdateResourceData
+) => {
+  const { amenityIds, ...resourceData } = payload;
+
+  //  Check resource exists
+  const existingResource = await prisma.resource.findUnique({
+    where: {
+      id: resourceId,
+    },
+    include: {
+      amenities: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!existingResource) {
+    throw new AppError(
+      status.NOT_FOUND,
+      "Resource not found"
+    );
+  }
+
+  //  Validate amenity IDs
+  if (amenityIds !== undefined) {
+    const uniqueAmenityIds = [...new Set(amenityIds)];
+
+    const amenities = await prisma.amenity.findMany({
+      where: {
+        id: {
+          in: uniqueAmenityIds,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const foundAmenityIds = new Set(
+      amenities.map((amenity) => amenity.id)
+    );
+
+    const invalidAmenityIds = uniqueAmenityIds.filter(
+      (id) => !foundAmenityIds.has(id)
+    );
+
+    if (invalidAmenityIds.length > 0) {
+      throw new AppError(
+        status.NOT_FOUND,
+        `Invalid amenity ID: ${invalidAmenityIds.join(", ")}`
+      );
+    }
+  }
+
+  // Check resource field changed
+  const resourceChanged = Object.entries(resourceData).some(
+    ([key, value]) => {
+      return (
+        existingResource[
+          key as keyof typeof existingResource
+        ] !== value
+      );
+    }
+  );
+
+  // Check amenities changed
+  let amenitiesChanged = false;
+
+  if (amenityIds !== undefined) {
+    const oldAmenityIds = existingResource.amenities
+      .map((amenity) => amenity.id)
+      .sort();
+
+    const newAmenityIds = [...new Set(amenityIds)].sort();
+
+    amenitiesChanged =
+      JSON.stringify(oldAmenityIds) !==
+      JSON.stringify(newAmenityIds);
+  }
+
+  //  Nothing changed
+  if (!resourceChanged && !amenitiesChanged) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Resource is already updated"
+    );
+  }
+
+  //  Update
+  const result = await prisma.resource.update({
+    where: {
+      id: resourceId,
+    },
+    data: {
+      ...resourceData,
+
+      ...(amenityIds !== undefined && {
+        amenities: {
+          set: [...new Set(amenityIds)].map((id) => ({
+            id,
+          })),
+        },
+      }),
+    },
+    include: {
+      amenities: true,
+      hours: true,
+    },
+  });
+
+  return result;
+};
 export const resourceService = {
   createResource,
   getResources,
-  getResourceById
+  getResourceById,
+  updateResource
 };

@@ -62,8 +62,27 @@ const getResourceById = catchAsync(
     });
   }
 );
+
+const updateResource = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+  console.log("REQ BODY:", req.body);
+    const result = await resourceService.updateResource(
+      id as string,
+      req.body
+    );
+
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "Resource updated successfully",
+      data: result,
+    });
+  }
+);
 export const resourceController = {
   createResource,
   getResources,
-  getResourceById
+  getResourceById,
+  updateResource
 };
