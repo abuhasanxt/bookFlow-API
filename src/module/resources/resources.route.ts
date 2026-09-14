@@ -13,4 +13,6 @@ router.post(
   resourceController.createResource
 );
 
+router.get("/",resourceController.getResources)
+
 export const resourceRoutes=router

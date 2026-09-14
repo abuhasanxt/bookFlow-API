@@ -1,5 +1,6 @@
+import { Prisma } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
-import { ResourceData } from "./resources.interface";
+import { GetResourcesQuery, ResourceData } from "./resources.interface";
 
 const createResource = async (payload: ResourceData) => {
   const { amenityIds, ...resourceData } = payload;
@@ -25,6 +26,91 @@ const createResource = async (payload: ResourceData) => {
   return result;
 };
 
+const getResources = async (query: GetResourcesQuery) => {
+  const {
+    type,
+    minCapacity,
+    amenity,
+    availableFrom,
+    availableTo,
+    sortBy = "priceCentsPerHour",
+    sortOrder = "asc",
+    page = 1,
+    limit = 10,
+  } = query;
+
+  const skip = (page - 1) * limit;
+
+  const where: Prisma.ResourceWhereInput = {
+    isActive: true,
+
+    ...(type && {
+      type,
+    }),
+
+    ...(minCapacity !== undefined && {
+      capacity: {
+        gte: minCapacity,
+      },
+    }),
+
+    ...(amenity && {
+      amenities: {
+        some: {
+          id: amenity,
+        },
+      },
+    }),
+
+    ...(availableFrom &&
+      availableTo && {
+        bookings: {
+          none: {
+            startTime: {
+              lt: new Date(availableTo),
+            },
+            endTime: {
+              gt: new Date(availableFrom),
+            },
+          },
+        },
+      }),
+  };
+
+  const [resources, total] = await prisma.$transaction([
+    prisma.resource.findMany({
+      where,
+
+      include: {
+        amenities: true,
+      },
+
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+
+      skip,
+      take: limit,
+    }),
+
+    prisma.resource.count({
+      where,
+    }),
+  ]);
+
+  return {
+    data: resources,
+
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+  };
+};
+
 export const resourceService = {
   createResource,
+  getResources,
 };
