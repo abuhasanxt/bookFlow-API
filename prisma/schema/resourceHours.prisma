@@ -1,0 +1,12 @@
+model ResourceHours {
+  id         String   @id @default(uuid())
+  resourceId String
+  dayOfWeek  Int
+  openTime   String
+  closeTime  String
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+  @@map("resource_hours")
+}

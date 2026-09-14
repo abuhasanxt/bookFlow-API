@@ -8,6 +8,7 @@ model Resource {
   isActive          Boolean  @default(true)
 
   amenities Amenity[]
+  hours ResourceHours[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
