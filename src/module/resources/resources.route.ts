@@ -22,5 +22,10 @@ router.get(
   "/:id",
   resourceController.getResourceById
 );
+router.delete(
+  "/:id",
+  checkAuth(Role.ADMIN),
+  resourceController.deleteResource
+);
 
 export const resourceRoutes=router

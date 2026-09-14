@@ -80,9 +80,24 @@ const updateResource = catchAsync(
     });
   }
 );
+const deleteResource = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const result = await resourceService.deleteResource(id as string);
+
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "Resource deleted successfully",
+      data: result,
+    });
+  }
+);
 export const resourceController = {
   createResource,
   getResources,
   getResourceById,
-  updateResource
+  updateResource,
+  deleteResource
 };

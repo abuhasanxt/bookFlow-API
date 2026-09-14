@@ -250,9 +250,46 @@ const updateResource = async (
 
   return result;
 };
+
+const deleteResource = async (resourceId: string) => {
+  //  Check resource exists
+  const existingResource = await prisma.resource.findUnique({
+    where: {
+      id: resourceId,
+    },
+  });
+
+  if (!existingResource) {
+    throw new AppError(
+      status.NOT_FOUND,
+      "Resource not found"
+    );
+  }
+
+  //  Already inactive
+  if (!existingResource.isActive) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Resource is already deleted"
+    );
+  }
+
+  // Soft delete
+  await prisma.resource.update({
+    where: {
+      id: resourceId,
+    },
+    data: {
+      isActive: false,
+    },
+  });
+
+  return {massage:"Resource delete successfully"};
+};
 export const resourceService = {
   createResource,
   getResources,
   getResourceById,
-  updateResource
+  updateResource,
+  deleteResource
 };
