@@ -1,0 +1,8 @@
+model Amenity {
+  id   String @id @default(uuid())
+  name String @unique
+
+  resources Resource[]
+
+  @@map("amenities")
+}

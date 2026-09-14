@@ -2,3 +2,8 @@ enum Role {
     ADMIN
     USER
 }
+enum ResourceType {
+  ROOM
+  DESK
+  EQUIPMENT
+}
