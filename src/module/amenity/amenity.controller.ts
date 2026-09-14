@@ -35,8 +35,20 @@ const updateAmenity=catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const deleteAmenity=catchAsync(async (req: Request, res: Response) => {
+    const id=req.params.id
+  const result = await amenityService.deleteAmenity(id as string);
+  sendResponse(res, {
+    success: true,
+    httpStatusCode: status.OK,
+    message: " Amenity Delete successful.",
+    data: result.message,
+  });
+});
 export const amenityController = {
   createAmenity,
   getAmenity,
-  updateAmenity
+  updateAmenity,
+  deleteAmenity
 };

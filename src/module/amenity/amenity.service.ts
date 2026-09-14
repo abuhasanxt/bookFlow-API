@@ -25,10 +25,7 @@ const getAmenity = async () => {
   return result;
 };
 
-const updateAmenity = async (
-  id: string,
-  data: { name: string },
-) => {
+const updateAmenity = async (id: string, data: { name: string }) => {
   const existsAmenity = await prisma.amenity.findUnique({
     where: {
       id,
@@ -36,6 +33,23 @@ const updateAmenity = async (
   });
   if (!existsAmenity) {
     throw new AppError(status.NOT_FOUND, "Amenity not found");
+  }
+
+  if (existsAmenity.name === data.name) {
+    throw new AppError(status.BAD_REQUEST, "Amenity already updated");
+  }
+
+  const duplicateAmenity = await prisma.amenity.findFirst({
+    where: {
+      name: data.name,
+      NOT: {
+        id,
+      },
+    },
+  });
+
+  if (duplicateAmenity) {
+    throw new AppError(status.CONFLICT, "Amenity name already exists");
   }
 
   const result = await prisma.amenity.update({
@@ -46,11 +60,30 @@ const updateAmenity = async (
       name: data.name,
     },
   });
-  return result
+
+  return result;
+};
+
+const deleteAmenity = async (id: string) => {
+  const existsAmenity = await prisma.amenity.findUnique({
+    where: {
+      id,
+    },
+  });
+  if (!existsAmenity) {
+    throw new AppError(status.NOT_FOUND, "Amenity not found");
+  }
+  await prisma.amenity.delete({
+    where: {
+      id,
+    },
+  });
+  return {message:"Amenity Delete Successfully"};
 };
 
 export const amenityService = {
   createAmenity,
   getAmenity,
   updateAmenity,
+  deleteAmenity
 };
