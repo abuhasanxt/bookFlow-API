@@ -12,5 +12,6 @@ router.post(
   validateRequest(createAmenityZodSchema),
   amenityController.createAmenity,
 );
+router.patch("/:id",amenityController.updateAmenity)
 router.get("/",amenityController.getAmenity)
 export const amenityRoutes = router;

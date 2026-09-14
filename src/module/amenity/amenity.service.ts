@@ -20,12 +20,37 @@ const createAmenity = async (data: { name: string }) => {
   return result;
 };
 
-const getAmenity=async()=>{
-    const result=await prisma.amenity.findMany()
-    return result
-}
+const getAmenity = async () => {
+  const result = await prisma.amenity.findMany();
+  return result;
+};
+
+const updateAmenity = async (
+  id: string,
+  data: { name: string },
+) => {
+  const existsAmenity = await prisma.amenity.findUnique({
+    where: {
+      id,
+    },
+  });
+  if (!existsAmenity) {
+    throw new AppError(status.NOT_FOUND, "Amenity not found");
+  }
+
+  const result = await prisma.amenity.update({
+    where: {
+      id,
+    },
+    data: {
+      name: data.name,
+    },
+  });
+  return result
+};
 
 export const amenityService = {
   createAmenity,
-  getAmenity
+  getAmenity,
+  updateAmenity,
 };
