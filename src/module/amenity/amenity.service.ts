@@ -20,6 +20,12 @@ const createAmenity = async (data: { name: string }) => {
   return result;
 };
 
+const getAmenity=async()=>{
+    const result=await prisma.amenity.findMany()
+    return result
+}
+
 export const amenityService = {
   createAmenity,
+  getAmenity
 };

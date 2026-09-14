@@ -5,6 +5,6 @@ import { amenityRoutes } from '../module/amenity/amenity.route';
 const router = express.Router();
 router.use("/auth",authRoutes)
 router.use("/api/auth",googleLoginRoutes)
-router.use("/amenity",amenityRoutes)
+router.use("/amenities",amenityRoutes)
 
 export const indexRoutes=router

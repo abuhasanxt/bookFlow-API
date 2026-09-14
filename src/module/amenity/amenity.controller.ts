@@ -14,6 +14,17 @@ const createAmenity = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const getAmenity=catchAsync(async (req: Request, res: Response) => {
+  const result = await amenityService.getAmenity();
+  sendResponse(res, {
+    success: true,
+    httpStatusCode: status.OK,
+    message: "Get Amenities successful.",
+    data: result,
+  });
+});
 export const amenityController = {
   createAmenity,
+  getAmenity
 };
