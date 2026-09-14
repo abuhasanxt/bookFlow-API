@@ -1,4 +1,6 @@
+import status from "http-status";
 import { Prisma } from "../../../generated/prisma/client";
+import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { GetResourcesQuery, ResourceData } from "./resources.interface";
 
@@ -109,8 +111,29 @@ const getResources = async (query: GetResourcesQuery) => {
     },
   };
 };
+const getResourceById = async (resourceId: string) => {
+  const result = await prisma.resource.findUnique({
+    where: {
+      id: resourceId,
+      isActive: true,
+    },
+    include: {
+      amenities: true,
+      hours: true,
+    },
+  });
 
+  if (!result) {
+    throw new AppError(
+      status.NOT_FOUND,
+      "Resource not found"
+    );
+  }
+
+  return result;
+};
 export const resourceService = {
   createResource,
   getResources,
+  getResourceById
 };

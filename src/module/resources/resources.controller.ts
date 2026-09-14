@@ -48,7 +48,22 @@ const getResources = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getResourceById = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const result = await resourceService.getResourceById(id as string);
+
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "Resource retrieved successfully",
+      data: result,
+    });
+  }
+);
 export const resourceController = {
   createResource,
   getResources,
+  getResourceById
 };

@@ -14,5 +14,9 @@ router.post(
 );
 
 router.get("/",resourceController.getResources)
+router.get(
+  "/:id",
+  resourceController.getResourceById
+);
 
 export const resourceRoutes=router
