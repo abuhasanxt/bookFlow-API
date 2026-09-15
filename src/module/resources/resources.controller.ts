@@ -62,6 +62,21 @@ const getResourceById = catchAsync(
     });
   }
 );
+const getAvailability = catchAsync(async (req: Request, res: Response) => {
+  const { resourceId } = req.params;
+  const { date } = req.query;
+  const result = await resourceService.getAvailability(
+    resourceId as string,
+    date as string,
+  );
+
+  sendResponse(res, {
+    success: true,
+    httpStatusCode: status.OK,
+    message: "Resource availability retrieved successfully",
+    data: result,
+  });
+});
 
 const updateResource = catchAsync(
   async (req: Request, res: Response) => {
@@ -113,6 +128,7 @@ export const resourceController = {
   createResource,
   getResources,
   getResourceById,
+  getAvailability,
   updateResource,
   updateResourceHours,
   deleteResource

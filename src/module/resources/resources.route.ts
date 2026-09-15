@@ -28,6 +28,10 @@ router.put(
   validateRequest(updateResourceHoursSchema),
   resourceController.updateResourceHours,
 );
+router.get(
+  "/:resourceId/availability",
+  resourceController.getAvailability,
+);
 router.get("/", resourceController.getResources);
 router.get("/:id", resourceController.getResourceById);
 router.delete("/:id", checkAuth(Role.ADMIN), resourceController.deleteResource);

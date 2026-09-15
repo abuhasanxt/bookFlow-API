@@ -132,7 +132,159 @@ const getResourceById = async (resourceId: string) => {
 
   return result;
 };
+const getAvailability = async (resourceId: string, date: string) => {
+  //  Validate date
+  if (!date) {
+    throw new AppError(status.BAD_REQUEST, "Date is required");
+  }
 
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+  if (!dateRegex.test(date)) {
+    throw new AppError(status.BAD_REQUEST, "Date must be in YYYY-MM-DD format");
+  }
+  // Create start and end of requested day
+  const startOfDay = new Date(`${date}T00:00:00`);
+  const endOfDay = new Date(`${date}T23:59:59.999`);
+
+  if (isNaN(startOfDay.getTime())) {
+    throw new AppError(status.BAD_REQUEST, "Invalid date");
+  }
+  //Check Resource
+  const resource = await prisma.resource.findUnique({
+    where: {
+      id: resourceId,
+    },
+  });
+
+  if (!resource) {
+    throw new AppError(status.NOT_FOUND, "Resource not found");
+  }
+  //  Get day of week
+  const dayOfWeek = startOfDay.getDay();
+  //  Get Resource Open Hours
+  const openHour = await prisma.resourceHours.findFirst({
+    where: {
+      resourceId,
+      dayOfWeek,
+    },
+  });
+  // Get Confirmed Bookings
+  const bookings = await prisma.booking.findMany({
+    where: {
+      resourceId,
+
+      status: "CONFIRMED",
+      // Booking overlaps with requested day
+      startTime: {
+        lt: endOfDay,
+      },
+
+      endTime: {
+        gt: startOfDay,
+      },
+    },
+
+    orderBy: {
+      startTime: "asc",
+    },
+
+    select: {
+      id: true,
+      startTime: true,
+      endTime: true,
+      status: true,
+      totalCents: true,
+    },
+  });
+  // Resource Closed
+  if (!openHour) {
+    return {
+      date,
+      dayOfWeek,
+      isOpen: false,
+
+      openHours: null,
+
+      booked: bookings.map((booking) => ({
+        id: booking.id,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        status: booking.status,
+        totalCents: booking.totalCents,
+      })),
+
+      free: [],
+    };
+  }
+  // Create Opening & Closing Time
+  const openTime = new Date(`${date}T${openHour.openTime}:00`);
+
+  const closeTime = new Date(`${date}T${openHour.closeTime}:00`);
+  // Calculate Free Slots
+  const freeSlots: {
+    startTime: Date;
+    endTime: Date;
+  }[] = [];
+
+  let currentTime = openTime;
+
+  for (const booking of bookings) {
+    // Ignore booking completely outside opening hours
+    if (booking.endTime <= openTime || booking.startTime >= closeTime) {
+      continue;
+    }
+    // Booking start inside opening hours
+    const bookingStart =
+      booking.startTime < openTime ? openTime : booking.startTime;
+
+    // Booking end inside opening hours
+    const bookingEnd =
+      booking.endTime > closeTime ? closeTime : booking.endTime;
+
+    // Free slot before booking
+    if (currentTime < bookingStart) {
+      freeSlots.push({
+        startTime: currentTime,
+        endTime: bookingStart,
+      });
+    }
+
+    // Move current time forward
+    if (bookingEnd > currentTime) {
+      currentTime = bookingEnd;
+    }
+  }
+  // Free Slot After Last Booking
+  if (currentTime < closeTime) {
+    freeSlots.push({
+      startTime: currentTime,
+      endTime: closeTime,
+    });
+  }
+  // Return Availability
+  return {
+    date,
+    dayOfWeek,
+
+    isOpen: true,
+
+    openHours: {
+      openTime: openHour.openTime,
+      closeTime: openHour.closeTime,
+    },
+
+    booked: bookings.map((booking) => ({
+      id: booking.id,
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+      status: booking.status,
+      totalCents: booking.totalCents,
+    })),
+
+    free: freeSlots,
+  };
+};
 
 const updateResource = async (
   resourceId: string,
@@ -360,6 +512,7 @@ export const resourceService = {
   createResource,
   getResources,
   getResourceById,
+  getAvailability,
   updateResource,
   updateResourceHours,
   deleteResource
