@@ -250,6 +250,76 @@ const updateResource = async (
 
   return result;
 };
+const updateResourceHours = async (
+  resourceId: string,
+  hours: {
+    dayOfWeek: number;
+    openTime: string;
+    closeTime: string;
+  }[],
+) => {
+  //  Check resource
+  const resource = await prisma.resource.findUnique({
+    where: {
+      id: resourceId,
+    },
+  });
+
+  if (!resource) {
+    throw new AppError(status.NOT_FOUND, "Resource not found");
+  }
+
+  //  Validate time
+  for (const hour of hours) {
+    if (hour.openTime >= hour.closeTime) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        `Open time must be before close time for day ${hour.dayOfWeek}`,
+      );
+    }
+  }
+
+  //  Check duplicate dayOfWeek
+  const days = hours.map((hour) => hour.dayOfWeek);
+
+  const uniqueDays = new Set(days);
+
+  if (uniqueDays.size !== days.length) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Duplicate dayOfWeek is not allowed",
+    );
+  }
+
+  //  Replace old hours with new hours
+  const result = await prisma.$transaction(async (tx) => {
+    await tx.resourceHours.deleteMany({
+      where: {
+        resourceId,
+      },
+    });
+
+    await tx.resourceHours.createMany({
+      data: hours.map((hour) => ({
+        resourceId,
+        dayOfWeek: hour.dayOfWeek,
+        openTime: hour.openTime,
+        closeTime: hour.closeTime,
+      })),
+    });
+
+    return tx.resourceHours.findMany({
+      where: {
+        resourceId,
+      },
+      orderBy: {
+        dayOfWeek: "asc",
+      },
+    });
+  });
+
+  return result;
+};
 
 const deleteResource = async (resourceId: string) => {
   //  Check resource exists
@@ -291,5 +361,6 @@ export const resourceService = {
   getResources,
   getResourceById,
   updateResource,
+  updateResourceHours,
   deleteResource
 };

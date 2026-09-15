@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+
 export const createResourceValidationSchema = z.object({
   name: z
     .string()
@@ -62,4 +64,16 @@ export const updateResourceValidationSchema = z.object({
   amenityIds: z
     .array(z.string().uuid("Invalid amenity ID"))
     .optional(),
+});
+
+export const updateResourceHoursSchema = z.object({
+  hours: z
+    .array(
+      z.object({
+        dayOfWeek: z.number().int().min(0).max(6),
+        openTime: z.string().regex(timeRegex, "Invalid open time"),
+        closeTime: z.string().regex(timeRegex, "Invalid close time"),
+      }),
+    )
+    .min(1),
 });

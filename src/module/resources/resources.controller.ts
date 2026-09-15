@@ -80,6 +80,21 @@ const updateResource = catchAsync(
     });
   }
 );
+const updateResourceHours = catchAsync(async (req: Request, res: Response) => {
+  const { resourceId } = req.params;
+
+  const result = await resourceService.updateResourceHours(
+    resourceId as string,
+    req.body.hours,
+  );
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Resource hours updated successfully",
+    data: result,
+  });
+});
 const deleteResource = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -99,5 +114,6 @@ export const resourceController = {
   getResources,
   getResourceById,
   updateResource,
+  updateResourceHours,
   deleteResource
 };
