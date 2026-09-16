@@ -82,9 +82,32 @@ const cancelBooking = catchAsync(
     });
   }
 );
+const updateBooking = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user.userId;
+    const role = req.user.role;
+
+    const { bookingId } = req.params;
+
+    const result = await bookingService.updateBooking(
+      userId,
+      role,
+      bookingId as string,
+      req.body
+    );
+
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "Booking rescheduled successfully",
+      data: result,
+    });
+  }
+);
 export const bookingController = {
   createBooking,
   getBookings,
   getBookingById,
-  cancelBooking
+  cancelBooking,
+  updateBooking
 };

@@ -1,7 +1,7 @@
 import express from "express";
 import { checkAuth } from "../../middleware/checkAuth";
 import { validateRequest } from "../../middleware/validateRequest";
-import { createBookingZodSchema } from "./booking.validation";
+import { createBookingZodSchema, updateBookingZodSchema } from "./booking.validation";
 import { bookingController } from "./booking.controller";
 import { Role } from "../../../generated/prisma/enums";
 
@@ -16,6 +16,12 @@ router.post(
   "/:bookingId/cancel",
   checkAuth(Role.ADMIN,Role.USER),
   bookingController.cancelBooking
+);
+router.patch(
+  "/:bookingId",
+  checkAuth(),
+  validateRequest(updateBookingZodSchema),
+  bookingController.updateBooking
 );
 router.get(
   "/",

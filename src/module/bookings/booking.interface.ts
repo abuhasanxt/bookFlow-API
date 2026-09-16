@@ -3,3 +3,7 @@ export interface CreateBooking {
   startTime: string;
   endTime: string;
 }
+export interface UpdateBooking {
+  startTime: string;
+  endTime: string;
+}

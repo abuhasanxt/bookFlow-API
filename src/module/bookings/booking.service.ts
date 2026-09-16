@@ -2,7 +2,7 @@
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
-import { CreateBooking } from "./booking.interface";
+import { CreateBooking, UpdateBooking } from "./booking.interface";
 import { BookingStatus, Role } from "../../../generated/prisma/enums";
 
 const createBooking = async (userId: string, data: CreateBooking) => {
@@ -122,11 +122,7 @@ const createBooking = async (userId: string, data: CreateBooking) => {
   return booking;
 };
 
-const getBookings = async (
-  userId: string,
-  role: string,
-  all?: boolean
-) => {
+const getBookings = async (userId: string, role: string, all?: boolean) => {
   const where: any = {};
 
   //get all booking admin
@@ -147,7 +143,7 @@ const getBookings = async (
 const getBookingById = async (
   userId: string,
   role: string,
-  bookingId: string
+  bookingId: string,
 ) => {
   const booking = await prisma.booking.findUnique({
     where: {
@@ -179,17 +175,14 @@ const getBookingById = async (
 
   // Booking not found
   if (!booking) {
-    throw new AppError(
-      status.NOT_FOUND,
-      "Booking not found"
-    );
+    throw new AppError(status.NOT_FOUND, "Booking not found");
   }
 
   // USER  ownership check
   if (role !== Role.ADMIN && booking.userId !== userId) {
     throw new AppError(
       status.FORBIDDEN,
-      "You are not allowed to view this booking"
+      "You are not allowed to view this booking",
     );
   }
 
@@ -199,7 +192,7 @@ const getBookingById = async (
 const cancelBooking = async (
   userId: string,
   role: string,
-  bookingId: string
+  bookingId: string,
 ) => {
   const booking = await prisma.booking.findUnique({
     where: {
@@ -209,26 +202,20 @@ const cancelBooking = async (
 
   // Booking not found
   if (!booking) {
-    throw new AppError(
-      status.NOT_FOUND,
-      "Booking not found"
-    );
+    throw new AppError(status.NOT_FOUND, "Booking not found");
   }
 
   // Ownership check
   if (role !== Role.ADMIN && booking.userId !== userId) {
     throw new AppError(
       status.FORBIDDEN,
-      "You are not allowed to cancel this booking"
+      "You are not allowed to cancel this booking",
     );
   }
 
   // Already cancelled
   if (booking.status === BookingStatus.CANCELLED) {
-    throw new AppError(
-      status.BAD_REQUEST,
-      "Booking is already cancelled"
-    );
+    throw new AppError(status.BAD_REQUEST, "Booking is already cancelled");
   }
 
   // Cancel booking
@@ -244,9 +231,168 @@ const cancelBooking = async (
 
   return result;
 };
-export const bookingService = { 
-  createBooking ,
+const updateBooking = async (
+  userId: string,
+  role: string,
+  bookingId: string,
+  data: UpdateBooking,
+) => {
+  const { startTime, endTime } = data;
+
+  //  Find existing booking
+  const existingBooking = await prisma.booking.findUnique({
+    where: {
+      id: bookingId,
+    },
+    include: {
+      resource: true,
+    },
+  });
+
+  if (!existingBooking) {
+    throw new AppError(status.NOT_FOUND, "Booking not found");
+  }
+
+  //  Ownership check
+  if (role !== Role.ADMIN && existingBooking.userId !== userId) {
+    throw new AppError(
+      status.FORBIDDEN,
+      "You are not allowed to update this booking",
+    );
+  }
+
+  //  Cannot update cancelled booking
+  if (existingBooking.status === BookingStatus.CANCELLED) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Cancelled booking cannot be rescheduled",
+    );
+  }
+
+  //  Convert time
+  const bookingStart = new Date(startTime);
+  const bookingEnd = new Date(endTime);
+
+  if (isNaN(bookingStart.getTime()) || isNaN(bookingEnd.getTime())) {
+    throw new AppError(status.BAD_REQUEST, "Invalid startTime or endTime");
+  }
+
+  //  Start must be before end
+  if (bookingStart >= bookingEnd) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "End time must be greater than start time",
+    );
+  }
+// Same time check
+if (
+  existingBooking.startTime.getTime() === bookingStart.getTime() &&
+  existingBooking.endTime.getTime() === bookingEnd.getTime()
+) {
+  throw new AppError(
+    status.BAD_REQUEST,
+    "Booking already has these times"
+  );
+}
+  //  Get day of booking
+  const startOfDay = new Date(bookingStart);
+  startOfDay.setHours(0, 0, 0, 0);
+  const dayOfWeek = bookingStart.getDay();
+
+  //  Resource opening hours
+  const resourceHour = await prisma.resourceHours.findFirst({
+    where: {
+      resourceId: existingBooking.resourceId,
+      dayOfWeek,
+    },
+  });
+
+  if (!resourceHour) {
+    throw new AppError(status.BAD_REQUEST, "Resource is closed on this day");
+  }
+  //  Create opening and closing Datetime
+  const date = `${bookingStart.getFullYear()}-${String(
+    bookingStart.getMonth() + 1,
+  ).padStart(2, "0")}-${String(bookingStart.getDate()).padStart(2, "0")}`;
+  const openTime = new Date(`${date}T${resourceHour.openTime}:00`);
+
+  const closeTime = new Date(`${date}T${resourceHour.closeTime}:00`);
+
+  //  Check opening hours
+  if (bookingStart < openTime || bookingEnd > closeTime) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      `Booking time must be between ${resourceHour.openTime} and ${resourceHour.closeTime}`,
+    );
+  }
+
+  //  Calculate Duration
+  const durationMs = bookingEnd.getTime() - bookingStart.getTime();
+
+  const durationHours = durationMs / (1000 * 60 * 60);
+
+  const totalCents = Math.round(
+    durationHours * existingBooking.resource.priceCentsPerHour,
+  );
+
+  //  Transaction
+  const updatedBooking = await prisma.$transaction(async (tx) => {
+    // Check overlapping booking
+    const overlappingBooking = await tx.booking.findFirst({
+      where: {
+        resourceId: existingBooking.resourceId,
+
+        status: BookingStatus.CONFIRMED,
+
+        startTime: {
+          lt: bookingEnd,
+        },
+
+        endTime: {
+          gt: bookingStart,
+        },
+
+        // Don't compare with itself
+        id: {
+          not: bookingId,
+        },
+      },
+    });
+    // If Slot Already Booked
+    if (overlappingBooking) {
+      throw new AppError(status.CONFLICT, "This time slot is already booked");
+    }
+    // Create Booking
+    try {
+      const result = await tx.booking.update({
+        where: {
+          id: bookingId,
+        },
+
+        data: {
+          startTime: bookingStart,
+          endTime: bookingEnd,
+          totalCents,
+        },
+      });
+
+      return result;
+    } catch (error: any) {
+      // PostgreSQL exclusion constraint
+      if (error?.code === "P2004") {
+        throw new AppError(status.CONFLICT, "This time slot is already booked");
+      }
+
+      throw error;
+    }
+  });
+
+  return updatedBooking;
+};
+export const bookingService = {
+  createBooking,
   getBookings,
   getBookingById,
-  cancelBooking
+  cancelBooking,
+  updateBooking,
 };

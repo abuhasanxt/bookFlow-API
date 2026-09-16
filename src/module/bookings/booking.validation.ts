@@ -11,3 +11,12 @@ export const createBookingZodSchema = z.object({
 
   endTime: z.string("End time is required").min(1, "End time is required"),
 });
+export const updateBookingZodSchema = z.object({
+  startTime: z
+    .string("Start time is required")
+    .min(1, "Start time is required"),
+
+  endTime: z
+    .string("End time is required")
+    .min(1, "End time is required"),
+});
