@@ -1,0 +1,699 @@
+{
+  "info": {
+    "_postman_id": "d1cfa42f-a0c0-48e7-a514-2ce277347686",
+    "name": "bookFlow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "46496936",
+    "_collection_link": "https://go.postman.co/collection/46496936-d1cfa42f-a0c0-48e7-a514-2ce277347686?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Rakib\",\r\n    \"email\": \"rakib@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"rakib@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getMe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/auth/me",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "email verify",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"rakib@gmail.com\",\r\n    \"otp\": \"192445\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/auth/email-verify",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "auth",
+                "email-verify"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "refresh token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/auth/refresh",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "log out",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/auth/logout",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update me",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "data",
+                  "value": "{\n    \"name\":\"Md Rakib Islam\"\n}",
+                  "type": "text",
+                  "uuid": "fdb93a38-6dba-4cf8-8e37-afe2cbf11434"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "uuid": "8d1bd492-d1d6-4cb1-90f9-1464b8909331",
+                  "src": "/C:/Users/Abu Hasan/OneDrive/Pictures/Saved Pictures/images (1).png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5000/auth/me",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete me",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/auth/me",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "amenity",
+      "item": [
+        {
+          "name": "create amenity",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"swiming pool\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/amenities",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "amenities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get amenities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/amenities",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "amenities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update amenity",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"swiming pool 3\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/amenities/3a722805-47b0-49bc-8758-4d0bb6fcc8d6",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "amenities",
+                "3a722805-47b0-49bc-8758-4d0bb6fcc8d6"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete amenity",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"swiming pool 3\"\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/amenities/3a722805-47b0-49bc-8758-4d0bb6fcc8d6",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "amenities",
+                "3a722805-47b0-49bc-8758-4d0bb6fcc8d6"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "resource",
+      "item": [
+        {
+          "name": "create resource",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Meeting Room A\",\r\n  \"type\": \"ROOM\",\r\n  \"description\": \"Large meeting room\",\r\n  \"capacity\": 10,\r\n  \"priceCentsPerHour\": 1500,\r\n  \"amenityIds\": [\r\n        \"f953c392-09f1-4025-9524-19ea781edeb5\"\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/resources",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "resources"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get resources",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/resources",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "resources"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "ROOM",
+                  "disabled": true
+                },
+                {
+                  "key": "minCapacity",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "amenity",
+                  "value": "5475d964-8666-4f71-b6ed-1fa86a07fc23",
+                  "disabled": true
+                },
+                {
+                  "key": "availableFrom",
+                  "value": "2026-09-15T10:00:00Z",
+                  "disabled": true
+                },
+                {
+                  "key": "availableTo",
+                  "value": "2026-09-15T12:00:00Z",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "priceCentsPerHour",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "asc",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "5",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get resource by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/resources/0b906d62-1876-4307-91af-d6455ebd57ad",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "resources",
+                "0b906d62-1876-4307-91af-d6455ebd57ad"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update resource",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Premium Meeting ROOM\"\r\n \r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/resources/68ed6636-895d-45bc-a767-eb3c6201f611",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "resources",
+                "68ed6636-895d-45bc-a767-eb3c6201f611"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete resource",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/resources/68ed6636-895d-45bc-a767-eb3c6201f611",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "resources",
+                "68ed6636-895d-45bc-a767-eb3c6201f611"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update resource hours",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"hours\": [\r\n    {\r\n      \"dayOfWeek\": 1,\r\n      \"openTime\": \"09:00\",\r\n      \"closeTime\": \"18:00\"\r\n    },\r\n    {\r\n      \"dayOfWeek\": 2,\r\n      \"openTime\": \"09:00\",\r\n      \"closeTime\": \"18:00\"\r\n    },\r\n    {\r\n      \"dayOfWeek\": 3,\r\n      \"openTime\": \"09:00\",\r\n      \"closeTime\": \"18:00\"\r\n    },\r\n    {\r\n      \"dayOfWeek\": 4,\r\n      \"openTime\": \"09:00\",\r\n      \"closeTime\": \"18:00\"\r\n    },\r\n    {\r\n      \"dayOfWeek\": 5,\r\n      \"openTime\": \"09:00\",\r\n      \"closeTime\": \"18:00\"\r\n    }\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/resources/0b906d62-1876-4307-91af-d6455ebd57ad/hours",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "resources",
+                "0b906d62-1876-4307-91af-d6455ebd57ad",
+                "hours"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/resources/d2a66390-7359-4b07-b3c7-a37521e81cec/availability?date=2026-11-01",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "resources",
+                "d2a66390-7359-4b07-b3c7-a37521e81cec",
+                "availability"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-11-01"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "bookings",
+      "item": [
+        {
+          "name": "create booking",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"resourceId\": \"0b906d62-1876-4307-91af-d6455ebd57ad\",\r\n  \"startTime\": \"2026-09-16T07:30:00.000Z\",\r\n  \"endTime\": \"2026-09-16T08:30:00.000Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/bookings",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "bookings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/bookings?all=true",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "bookings"
+              ],
+              "query": [
+                {
+                  "key": "all",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get booking by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/bookings/08614f7a-3709-4608-b47d-25d38cb3df43\"",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "bookings",
+                "08614f7a-3709-4608-b47d-25d38cb3df43\""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cancel booking",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/bookings/fbf49d25-5cf0-4f86-9eca-fbd48555948e/cancel",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "bookings",
+                "fbf49d25-5cf0-4f86-9eca-fbd48555948e",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update booking",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"startTime\": \"2026-09-16T08:30:00.000Z\",\r\n  \"endTime\": \"2026-09-16T09:30:00.000Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/bookings/ae8a9e47-c434-431d-8dd5-59301a999051",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "bookings",
+                "ae8a9e47-c434-431d-8dd5-59301a999051"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete booking",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/bookings/08614f7a-3709-4608-b47d-25d38cb3df43",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "bookings",
+                "08614f7a-3709-4608-b47d-25d38cb3df43"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
