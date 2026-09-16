@@ -12,6 +12,10 @@ router.post(
   checkAuth(Role.USER),
   validateRequest(createBookingZodSchema),
   bookingController.createBooking,
+);router.post(
+  "/:bookingId/cancel",
+  checkAuth(Role.ADMIN,Role.USER),
+  bookingController.cancelBooking
 );
 router.get(
   "/",

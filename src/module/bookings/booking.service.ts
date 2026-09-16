@@ -111,7 +111,7 @@ const createBooking = async (userId: string, data: CreateBooking) => {
         userId,
         startTime: bookingStart,
         endTime: bookingEnd,
-        status: "CONFIRMED",
+        status: BookingStatus.CONFIRMED,
         totalCents,
       },
     });
@@ -195,8 +195,58 @@ const getBookingById = async (
 
   return booking;
 };
+
+const cancelBooking = async (
+  userId: string,
+  role: string,
+  bookingId: string
+) => {
+  const booking = await prisma.booking.findUnique({
+    where: {
+      id: bookingId,
+    },
+  });
+
+  // Booking not found
+  if (!booking) {
+    throw new AppError(
+      status.NOT_FOUND,
+      "Booking not found"
+    );
+  }
+
+  // Ownership check
+  if (role !== Role.ADMIN && booking.userId !== userId) {
+    throw new AppError(
+      status.FORBIDDEN,
+      "You are not allowed to cancel this booking"
+    );
+  }
+
+  // Already cancelled
+  if (booking.status === BookingStatus.CANCELLED) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Booking is already cancelled"
+    );
+  }
+
+  // Cancel booking
+  const result = await prisma.booking.update({
+    where: {
+      id: bookingId,
+    },
+
+    data: {
+      status: BookingStatus.CANCELLED,
+    },
+  });
+
+  return result;
+};
 export const bookingService = { 
   createBooking ,
   getBookings,
-  getBookingById
+  getBookingById,
+  cancelBooking
 };
