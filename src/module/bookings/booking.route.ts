@@ -13,5 +13,10 @@ router.post(
   validateRequest(createBookingZodSchema),
   bookingController.createBooking,
 );
+router.get(
+  "/",
+  checkAuth(Role.ADMIN,Role.USER),
+  bookingController.getBookings
+);
 
 export const bookingRoutes = router;

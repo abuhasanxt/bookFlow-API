@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { CreateBooking } from "./booking.interface";
-import { BookingStatus } from "../../../generated/prisma/enums";
+import { BookingStatus, Role } from "../../../generated/prisma/enums";
 
 const createBooking = async (userId: string, data: CreateBooking) => {
   const { resourceId, startTime, endTime } = data;
@@ -121,4 +122,30 @@ const createBooking = async (userId: string, data: CreateBooking) => {
   return booking;
 };
 
-export const bookingService = { createBooking };
+const getBookings = async (
+  userId: string,
+  role: string,
+  all?: boolean
+) => {
+  const where: any = {};
+
+  //get all booking admin
+  if (!(role === Role.ADMIN && all === true)) {
+    //user own booking
+    where.userId = userId;
+  }
+
+  const bookings = await prisma.booking.findMany({
+    where,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return bookings;
+};
+
+export const bookingService = { 
+  createBooking ,
+  getBookings
+};
