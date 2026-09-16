@@ -144,8 +144,59 @@ const getBookings = async (
 
   return bookings;
 };
+const getBookingById = async (
+  userId: string,
+  role: string,
+  bookingId: string
+) => {
+  const booking = await prisma.booking.findUnique({
+    where: {
+      id: bookingId,
+    },
 
+    include: {
+      resource: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          description: true,
+          capacity: true,
+          priceCentsPerHour: true,
+          isActive: true,
+        },
+      },
+
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  // Booking not found
+  if (!booking) {
+    throw new AppError(
+      status.NOT_FOUND,
+      "Booking not found"
+    );
+  }
+
+  // USER  ownership check
+  if (role !== Role.ADMIN && booking.userId !== userId) {
+    throw new AppError(
+      status.FORBIDDEN,
+      "You are not allowed to view this booking"
+    );
+  }
+
+  return booking;
+};
 export const bookingService = { 
   createBooking ,
-  getBookings
+  getBookings,
+  getBookingById
 };

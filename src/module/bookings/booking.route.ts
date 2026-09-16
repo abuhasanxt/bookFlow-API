@@ -18,5 +18,10 @@ router.get(
   checkAuth(Role.ADMIN,Role.USER),
   bookingController.getBookings
 );
+router.get(
+  "/:bookingId",
+  checkAuth(Role.ADMIN,Role.USER),
+  bookingController.getBookingById
+);
 
 export const bookingRoutes = router;
