@@ -27,3 +27,15 @@ ALTER TABLE "bookings" ADD CONSTRAINT "bookings_resourceId_fkey" FOREIGN KEY ("r
 
 -- AddForeignKey
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Enable btree_gist extension
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+-- Prevent overlapping CONFIRMED bookings
+ALTER TABLE "bookings"
+ADD CONSTRAINT "bookings_no_overlap"
+EXCLUDE USING gist (
+    "resourceId" WITH =,
+    tsrange("startTime", "endTime", '[)') WITH &&
+)
+WHERE ("status" = 'CONFIRMED');
