@@ -389,10 +389,52 @@ if (
 
   return updatedBooking;
 };
+
+const deleteBooking = async (
+  userId: string,
+  bookingId: string,
+  role: Role
+) => {
+  const booking = await prisma.booking.findUnique({
+    where: {
+      id: bookingId,
+    },
+  });
+
+  if (!booking) {
+    throw new AppError(status.NOT_FOUND, "Booking not found");
+  }
+
+  // Only cancelled booking can be deleted
+  if (booking.status !== BookingStatus.CANCELLED) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Only cancelled bookings can be deleted"
+    );
+  }
+
+  // Admin can delete any cancelled booking
+  // User can delete only their own cancelled booking
+  if (role !== Role.ADMIN && booking.userId !== userId) {
+    throw new AppError(
+      status.FORBIDDEN,
+      "You can only delete your own booking"
+    );
+  }
+
+  const result = await prisma.booking.delete({
+    where: {
+      id: bookingId,
+    },
+  });
+
+  return result;
+};
 export const bookingService = {
   createBooking,
   getBookings,
   getBookingById,
   cancelBooking,
   updateBooking,
+  deleteBooking
 };

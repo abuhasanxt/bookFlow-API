@@ -33,5 +33,10 @@ router.get(
   checkAuth(Role.ADMIN,Role.USER),
   bookingController.getBookingById
 );
+router.delete(
+  "/:bookingId",
+  checkAuth(Role.ADMIN,Role.USER),
+  bookingController.deleteBooking
+);
 
 export const bookingRoutes = router;
